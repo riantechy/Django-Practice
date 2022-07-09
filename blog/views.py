@@ -1,4 +1,3 @@
-from cgitb import html
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
     ListView, 
@@ -7,10 +6,9 @@ from django.views.generic import (
     UpdateView,
     DeleteView
     ) 
-from multiprocessing import context
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from requests import post
-from sqlalchemy import false, true
+from django.contrib.auth.models import User
 from .models import Post
 
 
@@ -32,6 +30,18 @@ class PostListView(ListView):
     context_object_name = 'posts'
     #ordering the posts from the newest to the oldest
     ordering = ('-date_posted') 
+    paginate_by = 2
+
+# getting the posts of specific user
+class UserPostListView(ListView):
+    model = Post
+    template_name = 'blog/user_post.html'
+    context_object_name = 'posts'
+    paginate_by = 2
+
+    def get_queryset(self):
+        user = get_object_or_404(User, username=self.kwargs.get('username'))
+        return Post.objects.filter(author = user).order_by('-date_posted')
 
 # Creating the list of each post
 class PostDetailView(DetailView):
@@ -40,7 +50,7 @@ class PostDetailView(DetailView):
 # Creating the list of each post
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['image','title', 'content']
   
 #   getting the author of the form
     def form_valid(self, form):
@@ -50,7 +60,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 # Update the list of each post
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['image', 'title', 'content']
   
 #   getting the author of the form
     def form_valid(self, form):
@@ -61,8 +71,8 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         post = self.get_object()
         if self.request.user == post.author:
-            return true
-        return false
+            return True
+        return False
 
 # Deleating the list of each post
 class PostDeleteView(DeleteView):
@@ -75,8 +85,8 @@ class PostDeleteView(DeleteView):
     def test_func(self):
         post = self.get_object()
         if self.request.user == post.author:
-            return true
-        return false
+            return True
+        return False
 
 def about(request):
     return render (request, 'blog/about.html', {'title': 'about'})

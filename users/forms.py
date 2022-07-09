@@ -10,7 +10,7 @@ class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
     first_name = forms.CharField()
     last_name = forms.CharField()
-    phone_no = forms.CharField()
+    phone_no = forms.CharField(required=False)
 
     class Meta:
         model = User
