@@ -8,6 +8,9 @@
             <a class="mr-2" href="{% url 'user-post' object.author.username %}">{{ object.author }}</a>
             <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
         </div>
+        <a class="navbar-brand" href="#">
+            <img  src="{{ object.author.image }}" alt="Logo" style="width:40px;">
+          </a>
         <h2 class="article-title">{{ object.title }}</h2>
         <p class="article-content">{{ object.content }}</p>
 
